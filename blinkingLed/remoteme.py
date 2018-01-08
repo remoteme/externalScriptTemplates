@@ -90,7 +90,6 @@ class RemoteMe(metaclass=Singleton):
         if response is None:
             response=[]
 
-
         responseMessage = remotemeMessages.getSyncResponseMessage(messageId,response)
         self.__send(responseMessage)
 
@@ -98,7 +97,6 @@ class RemoteMe(metaclass=Singleton):
 
     def __send(self,message):
         self.__socketObj.sendall(message)
-
 
 
     def __exit__(self, exc_type, exc_value, traceback):
