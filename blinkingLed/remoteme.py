@@ -99,6 +99,7 @@ class RemoteMe(metaclass=Singleton):
         self.__socketObj.sendall(message)
 
 
+
     def __exit__(self, exc_type, exc_value, traceback):
         self.__logger.info("Exit remoteme python with id {}".format(self.__ownId))
         if self.__socketObj is not None:
