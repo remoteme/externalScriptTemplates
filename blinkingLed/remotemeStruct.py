@@ -3,7 +3,8 @@ from enum import Enum
 import time
 
 
-USER_DATA_HEADEARS_SIZE = 7;
+USER_DATA_HEADEARS_SIZE = 7
+USER_SYNC_DATA_HEADEARS_SIZE = 12
 
 class UserMessageSettings(Enum):
     NO_RENEWAL = 0

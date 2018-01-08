@@ -1,9 +1,9 @@
 import logging
 import socket
 
-import messages
+import remotemeMessages
 import remoteme
-import struct
+import remotemeStruct
 
 import threading
 import sys

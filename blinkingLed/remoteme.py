@@ -1,11 +1,13 @@
 import socket
 import threading
 
-import messages
 import struct
+
+import remotemeMessages
+import remotemeStruct
 import logging
 
-from messages import getUserMessage
+from remotemeMessages import getUserMessage
 
 
 class Singleton(type):
@@ -19,7 +21,7 @@ class RemoteMe(metaclass=Singleton):
     pass
 
     __userMessageListeners=[]
-
+    __userSyncMessageListeners=[]
 
 
     __socketObj = None
@@ -36,26 +38,35 @@ class RemoteMe(metaclass=Singleton):
                 header = self.__socketObj.recv(4)
                 if (len(header) == 4):
                     [messageType, size] = struct.unpack(">hh", header)
-                    messageType = struct.MessageType(messageType)
+                    messageType = remotemeStruct.MessageType(messageType)
                     print('PYTHON messageType: {} size: {}'.format(messageType, size))
                     data = self.__socketObj.recv(size)
                     print('PYTHON data size: {} read '.format(len(data)))
                     if (len(data) == size):
-                        if (messageType == struct.MessageType.USER_MESSAGE):
+                        if (messageType == remotemeStruct.MessageType.USER_MESSAGE):
+                            self.__logger.info('on sync got')
                             [userMessageSettings, receiverDeviceId, senderDeviceId, messageId, data] = struct.unpack(
-                                ">Bhhh{0}s".format(size - struct.USER_DATA_HEADEARS_SIZE), data)
-                            userMessageSettings = struct.UserMessageSettings(userMessageSettings)#for later use
-
+                                ">Bhhh{0}s".format(size - remotemeStruct.USER_DATA_HEADEARS_SIZE), data)
+                            userMessageSettings = remotemeStruct.UserMessageSettings(userMessageSettings)#for later use
+    
                             if (self.__ownId==receiverDeviceId):
                                 self.__onUserMessage(userMessageSettings,senderDeviceId, messageId, data)
                             else:
                                 print('PYTHON wrong deviceId :{} '.format(receiverDeviceId))
+                        elif messageType == remotemeStruct.MessageType.USER_SYNC_MESSAGE:
+                            self.__logger.info("expected size of bytes {} data length:{}".format(size - remotemeStruct.USER_SYNC_DATA_HEADEARS_SIZE,len(data)));
+                            [receiverDeviceId, senderDeviceId, messageId, data] = struct.unpack(
+                                ">hhQ{0}s".format(size - remotemeStruct.USER_SYNC_DATA_HEADEARS_SIZE), data)
+    
+                            if (self.__ownId==receiverDeviceId):
+                                self.__onSyncMessage(senderDeviceId, messageId, data)
+                            else:
+                                print('PYTHON wrong deviceId :{} '.format(receiverDeviceId))
                         else:
                             print('PYTHON wrong data type {} '.format(messageType))
-
             except:
-                self.__socketObj.close()
-                print("PYTHON socke OBJ close")
+                self.__logger.exception("error while processing message")
+                exit(0)
         print("PYTHON end loop")
 
 
@@ -69,11 +80,20 @@ class RemoteMe(metaclass=Singleton):
         for listener in self.__userMessageListeners:
             listener(senderDeviceId,data)
 
-    def __onSyncMessage(self, userMessageSettings, senderDeviceId, messageId, data):
-        self.__logger.debug("got user sender deviceId:{} datalen:{} data: {} ".format(senderDeviceId, len(data),
-                                                                                    self.__toHexString(data)))
-        for listener in self.__userMessageListeners:
-            listener(senderDeviceId, data)
+    def __onSyncMessage(self,senderDeviceId,messageId, data):
+        self.__logger.debug("got user senc sender senderDeviceId:{} messageId:{} datalen:{} data: {} ".format(senderDeviceId, messageId, len(data),self.__toHexString(data)))
+        response=None
+
+        for listener in self.__userSyncMessageListeners:
+            response = listener(senderDeviceId, data)
+
+        if response is None:
+            response=[]
+
+
+        responseMessage = remotemeMessages.getSyncResponseMessage(messageId,response)
+        self.__send(responseMessage)
+
 
 
     def __send(self,message):
@@ -100,7 +120,7 @@ class RemoteMe(metaclass=Singleton):
             if len(sysargv)==5:
                 name=sysargv[4]
 
-            self.startRemoteMe(port,parentId,ownId,name)
+            self.startRemoteMeDirect(port,parentId,ownId,name)
 
         else:
             self.__logger.info("usable parentId ownId port deviceName")
@@ -108,7 +128,7 @@ class RemoteMe(metaclass=Singleton):
             exit(1)
 
 
-    def startRemoteMe(self, port, parentId, ownId,name):
+    def startRemoteMeDirect(self, port, parentId, ownId,name):
         if self.__socketObj is not None:
             self.__logger.warning("Remote Me already started")
             return
@@ -124,24 +144,27 @@ class RemoteMe(metaclass=Singleton):
         self.__threadRead.daemon = True
         self.__threadRead.start()
 
-        self.__send(messages.getRegisterLeafDeviceMessage(parentId, self.__ownId, name,
-                                                          struct.LeafDeviceType.LD_EXTERNAL_SCRIPT))
+        self.__send(remotemeMessages.getRegisterLeafDeviceMessage(parentId, self.__ownId, name,
+                                                                  remotemeStruct.LeafDeviceType.LD_EXTERNAL_SCRIPT))
 
     def addUserMessageListener(self, function):
         self.__userMessageListeners.append(function)
 
-    def addSyncMessageListener(self, function):
-        self.__userMessageListeners.append(function)
+    def addUserSyncMessageListener(self, function):
+        self.__userSyncMessageListeners.append(function)
 
     def sendUserMessage(self,receiveDevideId,data):
-        self.__send(messages.getUserMessage(struct.UserMessageSettings.NO_RENEWAL,receiveDevideId,self.__ownId,0,data))
+        self.__send(remotemeMessages.getUserMessage(remotemeStruct.UserMessageSettings.NO_RENEWAL, receiveDevideId, self.__ownId, 0, data))
 
     def logServerInfo(self, message):
-        self.__send(messages.getLogMessage(struct.LogLevel.INFO,message))
+        self.__send(remotemeMessages.getLogMessage(remotemeStruct.LogLevel.INFO, message))
 
     def logServerWarn(self, message):
-        self.__send(messages.getLogMessage(struct.LogLevel.WARN, message))
+        self.__send(remotemeMessages.getLogMessage(remotemeStruct.LogLevel.WARN, message))
 
     def logServerError(self, message):
-        self.__send(messages.getLogMessage(struct.LogLevel.ERROR, message))
+        self.__send(remotemeMessages.getLogMessage(remotemeStruct.LogLevel.ERROR, message))
+
+    def wait(self):
+        self.__threadRead.join()
 
