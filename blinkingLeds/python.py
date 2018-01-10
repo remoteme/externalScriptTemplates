@@ -11,6 +11,12 @@ import threading
 import sys
 from time import sleep
 
+import time
+import RPi.GPIO as GPIO
+
+outputPins =[26, 19]
+
+
 
 logger=None
 remoteMe=None
@@ -18,10 +24,24 @@ remoteMe=None
 
 def onUserSyncMessage(senderDeviceId,data):
     logger.info("on user SYNC message got from {} of length {}".format(senderDeviceId,len(data)))
-    return [data[0]*2]
+
+
+
 
 def onUserMessage(senderDeviceId,data):
     logger.info("on user message got from {} of length {}".format(senderDeviceId,len(data)))
+    GPIO.output(outputPins[data[0]], GPIO.HIGH if data[1] == 1 else GPIO.LOW)
+
+
+def setupPins():
+    GPIO.setmode(GPIO.BCM)  # Broadcom pin-numbering scheme
+    for pin in outputPins:
+        GPIO.setup(pin, GPIO.OUT)  # LED pin set as output
+
+
+
+
+
 
 try:
 
@@ -45,12 +65,13 @@ try:
     #   sleep(1)
     #   logger.info(">>> My Python application {}".format(i))
 
+    setupPins()
     remoteMe.wait()
 
 
 finally:
 
-
+    GPIO.cleanup()
     print("PYTHON finished")
 
 

@@ -152,8 +152,8 @@ class RemoteMe(metaclass=Singleton):
     def addUserSyncMessageListener(self, function):
         self.__userSyncMessageListeners.append(function)
 
-    def sendUserMessage(self,receiveDevideId,data):
-        self.__send(remotemeMessages.getUserMessage(remotemeStruct.UserMessageSettings.NO_RENEWAL, receiveDevideId, self.__ownId, 0, data))
+    def sendUserMessage(self,receiveDeviceId,data):
+        self.__send(remotemeMessages.getUserMessage(remotemeStruct.UserMessageSettings.NO_RENEWAL, receiveDeviceId, self.__ownId, 0, data))
 
     def logServerInfo(self, message):
         self.__send(remotemeMessages.getLogMessage(remotemeStruct.LogLevel.INFO, message))
