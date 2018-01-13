@@ -1,8 +1,10 @@
+#from __future__ import division
+
 import logging
 import socket
 
 
-
+import struct
 import remotemeMessages
 import remoteme
 import remotemeStruct
@@ -12,15 +14,22 @@ import sys
 from time import sleep
 
 import time
+
 import RPi.GPIO as GPIO
 
-outputPins =[26, 19]
-
-
+import Adafruit_PCA9685
 
 logger=None
 remoteMe=None
 
+
+pwm=None;
+
+motorAIn1=25#GPIO25
+motorAIn2=8#GPIO8
+
+motorBIn1=24#24
+motorBIn2=23#23
 
 def onUserSyncMessage(senderDeviceId,data):
     logger.info("on user SYNC message got from {} of length {}".format(senderDeviceId,len(data)))
@@ -29,17 +38,34 @@ def onUserSyncMessage(senderDeviceId,data):
 
 
 def onUserMessage(senderDeviceId,data):
-    logger.info("on user message got from {} of length {}".format(senderDeviceId,len(data)))
-    GPIO.output(outputPins[data[0]], GPIO.HIGH if data[1] == 1 else GPIO.LOW)
+    global pwm
+    data=struct.unpack('>Bh', data)
+    print("on setting servo {} with value {}".format(data[0],data[1]))
+    pwm.set_pwm(data[0], 0,data[1] )
+
+
+def setupServo():
+    global pwm
+    pwm= Adafruit_PCA9685.PCA9685()
+    pwm.set_pwm_freq(80)
 
 
 def setupPins():
     GPIO.setmode(GPIO.BCM)  # Broadcom pin-numbering scheme
-    for pin in outputPins:
-        GPIO.setup(pin, GPIO.OUT)  # LED pin set as output
+
+    GPIO.setup(motorAIn1, GPIO.OUT)
+    GPIO.setup(motorAIn2, GPIO.OUT)
+    GPIO.setup(motorBIn1, GPIO.OUT)
+    GPIO.setup(motorBIn2, GPIO.OUT)
 
 
+def motorBForward():
+    GPIO.output(motorBIn1, GPIO.LOW )
+    GPIO.output(motorBIn2, GPIO.HIGH)
 
+def motorBBackward():
+    GPIO.output(motorBIn1, GPIO.HIGH)
+    GPIO.output(motorBIn2, GPIO.LOW)
 
 
 
@@ -54,6 +80,9 @@ try:
 
     logger.info(">>> My Python application")
 
+    setupServo()
+    setupPins()
+    motorBForward()
     remoteMe = remoteme.RemoteMe()
     remoteMe.startRemoteMe(sys.argv)
 
@@ -65,13 +94,13 @@ try:
     #   sleep(1)
     #   logger.info(">>> My Python application {}".format(i))
 
-    setupPins()
+
     remoteMe.wait()
 
 
 finally:
 
-    GPIO.cleanup()
+
     print("PYTHON finished")
 
 
