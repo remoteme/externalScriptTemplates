@@ -31,8 +31,6 @@ motorAIn2=8#GPIO8
 motorBIn1=24#24
 motorBIn2=23#23
 
-motors =[[motorAIn1,motorAIn2],[motorBIn1,motorBIn2]]
-
 def onUserSyncMessage(senderDeviceId,data):
     logger.info("on user SYNC message got from {} of length {}".format(senderDeviceId,len(data)))
 
@@ -41,25 +39,12 @@ def onUserSyncMessage(senderDeviceId,data):
 
 def onUserMessage(senderDeviceId,data):
     global pwm
-    data=struct.unpack('>BBh', data)
-    motorId=data[0]
-    mode=data[1]
-    speed=data[2]
-
-    print("on setting motorId {} with mode {} and value:{}".format(motorId,mode,speed))
-
-    if mode==1:
-        motorSoftStop(motorId)
-    elif mode==2:
-        motorForward(motorId)
-    elif mode==3:
-        motorBackward(motorId)
-
-    pwm.set_pwm(motorId, 0,speed )
+    data=struct.unpack('>Bh', data)
+    print("on setting servo {} with value {}".format(data[0],data[1]))
+    pwm.set_pwm(data[0], 0,data[1] )
 
 
-
-def setupPWM():
+def setupServo():
     global pwm
     pwm= Adafruit_PCA9685.PCA9685()
     pwm.set_pwm_freq(80)
@@ -68,24 +53,19 @@ def setupPWM():
 def setupPins():
     GPIO.setmode(GPIO.BCM)  # Broadcom pin-numbering scheme
 
-    for motor in motors:
-        global GPIO
-        for pinId in motor:
-            GPIO.setup(pinId, GPIO.OUT)
+    GPIO.setup(motorAIn1, GPIO.OUT)
+    GPIO.setup(motorAIn2, GPIO.OUT)
+    GPIO.setup(motorBIn1, GPIO.OUT)
+    GPIO.setup(motorBIn2, GPIO.OUT)
 
 
+def motorBForward():
+    GPIO.output(motorBIn1, GPIO.LOW )
+    GPIO.output(motorBIn2, GPIO.HIGH)
 
-def motorForward(motorId):
-    GPIO.output(motors[motorId][0], GPIO.LOW )
-    GPIO.output(motors[motorId][1], GPIO.HIGH)
-
-def motorBackward(motorId):
-    GPIO.output(motors[motorId][0], GPIO.HIGH )
-    GPIO.output(motors[motorId][1], GPIO.LOW)
-
-def motorSoftStop(motorId):
-    GPIO.output(motors[motorId][0], GPIO.LOW )
-    GPIO.output(motors[motorId][1], GPIO.LOW)
+def motorBBackward():
+    GPIO.output(motorBIn1, GPIO.HIGH)
+    GPIO.output(motorBIn2, GPIO.LOW)
 
 
 
@@ -100,9 +80,9 @@ try:
 
     logger.info(">>> My Python application")
 
-    setupPWM()
+    setupServo()
     setupPins()
-
+    motorBForward()
     remoteMe = remoteme.RemoteMe()
     remoteMe.startRemoteMe(sys.argv)
 
