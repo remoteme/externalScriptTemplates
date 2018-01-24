@@ -5,10 +5,13 @@ import socket
 
 
 import struct
-import ../base/remotemeMessages
-import ../base/remoteme
-import ../base/remotemeStruct
-import ../base/remotemeUtils
+import sys; sys.path.append('./base');
+
+import remotemeMessages
+import remoteme
+import remotemeStruct
+import remotemeUtils
+
 
 import threading
 import sys

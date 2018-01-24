@@ -2,11 +2,13 @@ import logging
 import socket
 
 
+import sys; sys.path.append('./base');
 
-import ../base/remotemeMessages
-import ../base/remoteme
-import ../base/remotemeStruct
-import ../base/remotemeUtils
+import remotemeMessages
+import remoteme
+import remotemeStruct
+import remotemeUtils
+
 
 import threading
 import sys
