@@ -39,12 +39,9 @@ class RemoteMe(metaclass=Singleton):
                 if (len(header) == 4):
                     [messageType, size] = struct.unpack(">hh", header)
                     messageType = remotemeStruct.MessageType(messageType)
-                    print('PYTHON messageType: {} size: {}'.format(messageType, size))
                     data = self.__socketObj.recv(size)
-                    print('PYTHON data size: {} read '.format(len(data)))
                     if (len(data) == size):
                         if (messageType == remotemeStruct.MessageType.USER_MESSAGE):
-                            self.__logger.info('on sync got')
                             [userMessageSettings, receiverDeviceId, senderDeviceId, messageId, data] = struct.unpack(
                                 ">Bhhh{0}s".format(size - remotemeStruct.USER_DATA_HEADEARS_SIZE), data)
                             userMessageSettings = remotemeStruct.UserMessageSettings(userMessageSettings)#for later use

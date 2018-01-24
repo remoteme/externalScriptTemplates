@@ -3,9 +3,10 @@ import socket
 
 
 
-import remotemeMessages
-import remoteme
-import remotemeStruct
+import ../base/remotemeMessages
+import ../base/remoteme
+import ../base/remotemeStruct
+import ../base/remotemeUtils
 
 import threading
 import sys

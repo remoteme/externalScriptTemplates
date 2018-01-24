@@ -5,10 +5,10 @@ import socket
 
 
 import struct
-import remotemeMessages
-import remoteme
-import remotemeStruct
-import remotemeUtils
+import ../base/remotemeMessages
+import ../base/remoteme
+import ../base/remotemeStruct
+import ../base/remotemeUtils
 
 import threading
 import sys
@@ -58,8 +58,6 @@ def onUserMessage(senderDeviceId,wholeData):
             mode = data[2]
             speed = data[3]*16
 
-            logger.info("motor mode motorId:{} mode:{} speed:{}".format(motorId,mode,speed))
-
             if mode == 1:
                 motorSoftStop(motorId)
             elif mode == 2:
@@ -69,8 +67,12 @@ def onUserMessage(senderDeviceId,wholeData):
 
             pwm.set_pwm(motorsPWM[motorId], 0, speed)
 
+        elif data[0] == 2:#camera
+            cameraId = data[1]
+            position = data[2]*256+data[3]
 
 
+            pwm.set_pwm(cameraId, 0, position)
 
 
 
@@ -108,7 +110,7 @@ def motorSoftStop(motorId):
 
 try:
 
-    logging.basicConfig(level=logging.DEBUG,
+    logging.basicConfig(level=logging.INFO,
                         format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
                         datefmt='%d.%m %H:%M',
                         filename="./{}/logs.log".format(sys.argv[2]))
