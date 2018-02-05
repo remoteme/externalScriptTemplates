@@ -1,0 +1,34 @@
+{
+  "websocketServer": {
+    "port": 8082
+  },
+  "server": {
+    "port": 8082,
+    "token": "~1_1&2PfMc'wIS",
+    "ip": "192.168.0.30",
+    "deviceId": 234,
+    "name": "rpi2"
+  },
+  "socket": {
+    "port": 2329
+  },
+  "connections": [
+    {
+      "type": "SERIAL",
+      "configuration": {
+        "file": "/dev/serial0",
+        "speed": 19200
+      },
+      "name": "Serial",
+      "id": 3
+    },
+    {
+      "type": "EXTERNAL_SCRIPT",
+      "configuration": {
+        "scriptToRun": "runme.sh"
+      },
+      "name": "python_script",
+      "id": 444
+    }
+  ]
+}

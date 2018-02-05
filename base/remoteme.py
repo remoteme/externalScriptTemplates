@@ -108,18 +108,18 @@ class RemoteMe(metaclass=Singleton):
 
 
     def startRemoteMe(self,sysargv):
-        if (len(sysargv)>=4):
-            parentId = int(sysargv[1])
-            ownId = int(sysargv[2])
-            port = int(sysargv[3])
+        if (len(sysargv)>=5):
+            parentId = int(sysargv[2])
+            ownId = int(sysargv[3])
+            port = int(sysargv[4])
             name="python script"
-            if len(sysargv)==5:
-                name=sysargv[4]
+            if len(sysargv)==6:
+                name=sysargv[5]
 
             self.startRemoteMeDirect(port,parentId,ownId,name)
 
         else:
-            self.__logger.info("usable parentId ownId port deviceName")
+            self.__logger.info("usable working dir parentId ownId port deviceName")
             self.__logger.info("got parameters {} : {}".format(len(sysargv), sysargv))
             exit(1)
 
