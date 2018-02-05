@@ -4,7 +4,7 @@ import socket
 
 import sys;
 import os;
-os.chdir(sys.sysargv[1])
+os.chdir(sys.argv[1])
 
 sys.path.append('../base');
 
@@ -48,14 +48,12 @@ def setupPins():
 
 
 
-
-
 try:
 
     logging.basicConfig(level=logging.DEBUG,
                         format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
                         datefmt='%d.%m %H:%M',
-                        filename=".logs.log")
+                        filename="logs.log")
 
     logger = logging.getLogger('application')
 
