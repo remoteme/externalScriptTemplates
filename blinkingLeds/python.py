@@ -18,6 +18,8 @@ import threading
 
 from time import sleep
 
+import Adafruit_PCA9685
+
 import time
 import RPi.GPIO as GPIO
 

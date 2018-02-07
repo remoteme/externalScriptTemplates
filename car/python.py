@@ -116,7 +116,7 @@ try:
     logging.basicConfig(level=logging.INFO,
                         format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
                         datefmt='%d.%m %H:%M',
-                        filename="./{}/logs.log".format(sys.argv[2]))
+                        filename="./logs.log")
 
     logger = logging.getLogger('application')
 
