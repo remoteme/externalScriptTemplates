@@ -4,24 +4,28 @@ import logging
 import socket
 
 
-import struct
+import sys;
+import os;
+os.chdir(sys.argv[1])
 
-import sys; sys.path.append('./base');
+sys.path.append('../base');
 
 import remotemeMessages
 import remoteme
 import remotemeStruct
 import remotemeUtils
 
+
 import threading
-import sys
+
 from time import sleep
 
 import time
-
 import RPi.GPIO as GPIO
 
-import Adafruit_PCA9685
+outputPins =[26, 19]
+
+
 
 logger=None
 remoteMe=None
@@ -78,7 +82,7 @@ try:
     logging.basicConfig(level=logging.DEBUG,
                         format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
                         datefmt='%d.%m %H:%M',
-                        filename="./{}/logs.log".format(sys.argv[2]))
+                        filename=".logs.log")
 
     logger = logging.getLogger('application')
 
