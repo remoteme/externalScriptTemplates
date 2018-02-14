@@ -38,7 +38,6 @@ def onUserSyncMessage(senderDeviceId,data):
 
 
 def onUserMessage(senderDeviceId,data):
-    logger.info("on user message got from {} of length {}".format(senderDeviceId,len(data)))
     GPIO.output(outputPins[data[0]], GPIO.HIGH if data[1] == 1 else GPIO.LOW)
 
 

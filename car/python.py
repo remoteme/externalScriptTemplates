@@ -1,11 +1,12 @@
-#from __future__ import division
-
 import logging
 import socket
-
-
 import struct
-import sys; sys.path.append('./base');
+
+import sys;
+import os;
+os.chdir(sys.argv[1])
+
+sys.path.append('../base');
 
 import remotemeMessages
 import remoteme
@@ -14,14 +15,13 @@ import remotemeUtils
 
 
 import threading
-import sys
+
 from time import sleep
 
-import time
-
-import RPi.GPIO as GPIO
-
 import Adafruit_PCA9685
+
+import time
+import RPi.GPIO as GPIO
 
 
 

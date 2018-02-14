@@ -19,7 +19,7 @@ def getLogMessage(logLevel,message):
     return struct.pack(">hhB{0}sB".format(len(byteArray)), remotemeStruct.MessageType.LOG._value_, size, logLevel._value_, byteArray, 0)
 
 def getSyncResponseMessage(messageId,byteArray):
-    byteArray=bytearray( byteArray)
+    byteArray=bytearray(byteArray)
     size = 8 + len(byteArray)
     return struct.pack(">hhQ{0}s".format(len(byteArray)), remotemeStruct.MessageType.SYNC_MESSAGE_RESPONSE._value_, size, messageId, byteArray)
 
