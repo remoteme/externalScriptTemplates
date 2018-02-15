@@ -7,9 +7,10 @@ import socket
 import struct
 import sys
 import os
+
+
 os.chdir(sys.argv[1])
 
-sys.path.append('../base')
 
 import remotemeMessages
 import remoteme
@@ -17,7 +18,6 @@ import remotemeStruct
 import remotemeUtils
 
 
-import Adafruit_PCA9685
 
 
 
@@ -26,29 +26,18 @@ logger=None
 remoteMe=None
 
 
-pwm=None;
-
-
-
 def onUserSyncMessage(senderDeviceId,data):
     logger.info("on user SYNC message got from {} of length {}".format(senderDeviceId,len(data)))
 
-
+    return "Hello Sync "+remotemeMessages.getStringFromArray(data)
 
 
 def onUserMessage(senderDeviceId,data):
-    global pwm
-    data=struct.unpack('>Bh', data)
+    global remoteMe;
+    logger.info("on onUserMessage from senderId {}  length {}".format(senderDeviceId,len(data)))
 
-    print("on setting servo {} with value {}".format(data[0],data[1]))
-    pwm.set_pwm(data[0], 0,data[1] )
+    remoteMe.sendUserMessage(senderDeviceId,"Hello  "+remotemeMessages.getStringFromArray(data))
 
-
-
-def setupServo():
-    global pwm
-    pwm= Adafruit_PCA9685.PCA9685()
-    pwm.set_pwm_freq(80)
 
 
 
@@ -65,15 +54,14 @@ try:
 
     logger.info(">>> My Python application")
 
-    setupServo()
 
     remoteMe = remoteme.RemoteMe()
-    remoteMe.startRemoteMe(sys.argv)
 
 
     remoteMe.setUserMessageListener(onUserMessage)
     remoteMe.setUserSyncMessageListener(onUserSyncMessage)
 
+    remoteMe.startRemoteMe(sys.argv)
 
     remoteMe.wait()
 

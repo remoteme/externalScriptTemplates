@@ -63,8 +63,8 @@ try:
     remoteMe = remoteme.RemoteMe()
     remoteMe.startRemoteMe(sys.argv)
 
-    remoteMe.addUserMessageListener(onUserMessage)
-    remoteMe.addUserSyncMessageListener(onUserSyncMessage)
+    remoteMe.setUserMessageListener(onUserMessage)
+    remoteMe.setUserSyncMessageListener(onUserSyncMessage)
 
 
     #for i in range(0,20):
