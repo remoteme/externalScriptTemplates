@@ -19,9 +19,6 @@ import remotemeUtils
 
 
 
-
-
-
 logger=None
 remoteMe=None
 
@@ -33,13 +30,10 @@ def onUserSyncMessage(senderDeviceId,data):
 
 
 def onUserMessage(senderDeviceId,data):
-    global remoteMe;
+    global remoteMe
     logger.info("on onUserMessage from senderId {}  length {}".format(senderDeviceId,len(data)))
 
     remoteMe.sendUserMessage(senderDeviceId,"Hello  "+remotemeMessages.getStringFromArray(data))
-
-
-
 
 
 
@@ -54,9 +48,7 @@ try:
 
     logger.info(">>> My Python application")
 
-
     remoteMe = remoteme.RemoteMe()
-
 
     remoteMe.setUserMessageListener(onUserMessage)
     remoteMe.setUserSyncMessageListener(onUserSyncMessage)
