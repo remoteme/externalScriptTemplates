@@ -4,6 +4,7 @@ import struct
 
 import sys;
 import os;
+
 os.chdir(sys.argv[1])
 
 sys.path.append('../base');
@@ -12,7 +13,6 @@ import remotemeMessages
 import remoteme
 import remotemeStruct
 import remotemeUtils
-
 
 import threading
 
@@ -23,67 +23,61 @@ import Adafruit_PCA9685
 import time
 import RPi.GPIO as GPIO
 
+logger = None
+remoteMe = None
+
+pwm = None;
+
+motorAIn1 = 25  # GPIO25
+motorAIn2 = 8  # GPIO8
+
+motorBIn1 = 24  # 24
+motorBIn2 = 23  # 23
+
+motors = [[motorAIn1, motorAIn2], [motorBIn1, motorBIn2]]
+
+motorsPWM = [14, 15]
 
 
-logger=None
-remoteMe=None
+def onUserSyncMessage(senderDeviceId, data):
+    logger.info("on user SYNC message got from {} of length {}".format(senderDeviceId, len(data)))
 
 
-pwm=None;
+def setMotor(motorId, mode, speed):
+    if mode == 1:
+        motorSoftStop(motorId)
+    elif mode == 2:
+        motorForward(motorId)
+    elif mode == 3:
+        motorBackward(motorId)
 
-motorAIn1=25#GPIO25
-motorAIn2=8#GPIO8
-
-motorBIn1=24#24
-motorBIn2=23#23
-
-motors =[[motorAIn1,motorAIn2],[motorBIn1,motorBIn2]]
-
-motorsPWM=[14,15]
-
-def onUserSyncMessage(senderDeviceId,data):
-    logger.info("on user SYNC message got from {} of length {}".format(senderDeviceId,len(data)))
+    pwm.set_pwm(motorsPWM[motorId], 0, speed)
 
 
-
-
-def onUserMessage(senderDeviceId,wholeData):
+def onUserMessage(senderDeviceId, data):
     global pwm
+    data = struct.unpack('>BhhBBBB', data)
 
-    datas=remotemeUtils.splitMessage(wholeData,4)
-    for data in datas :
+    if data[0] == 1:
+        positionX = data[1]
+        positionY = data[2]
 
-        logger.info(data)
-        data=struct.unpack('>BBBB', data)
+        motorLeftMode = data[3]
+        motorLeftSpeed = data[4] * 16;
 
-        if data[0]==1:
-            motorId = data[1]
-            mode = data[2]
-            speed = data[3]*16
+        motorRightMode = data[5]
+        motorRightSpeed = data[6] * 16;
 
-            if mode == 1:
-                motorSoftStop(motorId)
-            elif mode == 2:
-                motorForward(motorId)
-            elif mode == 3:
-                motorBackward(motorId)
+        pwm.set_pwm(1, 0, positionX)
+        pwm.set_pwm(0, 0, positionY)
 
-            pwm.set_pwm(motorsPWM[motorId], 0, speed)
-
-        elif data[0] == 2:#camera
-            cameraId = data[1]
-            position = data[2]*256+data[3]
-
-
-            pwm.set_pwm(cameraId, 0, position)
-
-
-
+        setMotor(0, motorLeftMode, motorLeftSpeed)
+        setMotor(1, motorRightMode, motorRightSpeed)
 
 
 def setupPWM():
     global pwm
-    pwm= Adafruit_PCA9685.PCA9685()
+    pwm = Adafruit_PCA9685.PCA9685()
     pwm.set_pwm_freq(80)
 
 
@@ -96,19 +90,19 @@ def setupPins():
             GPIO.setup(pinId, GPIO.OUT)
 
 
-
 def motorForward(motorId):
-    GPIO.output(motors[motorId][0], GPIO.LOW )
+    GPIO.output(motors[motorId][0], GPIO.LOW)
     GPIO.output(motors[motorId][1], GPIO.HIGH)
 
+
 def motorBackward(motorId):
-    GPIO.output(motors[motorId][0], GPIO.HIGH )
+    GPIO.output(motors[motorId][0], GPIO.HIGH)
     GPIO.output(motors[motorId][1], GPIO.LOW)
+
 
 def motorSoftStop(motorId):
-    GPIO.output(motors[motorId][0], GPIO.LOW )
+    GPIO.output(motors[motorId][0], GPIO.LOW)
     GPIO.output(motors[motorId][1], GPIO.LOW)
-
 
 
 try:
@@ -131,17 +125,14 @@ try:
     remoteMe.setUserMessageListener(onUserMessage)
     remoteMe.setUserSyncMessageListener(onUserSyncMessage)
 
-
-    #for i in range(0,20):
+    # for i in range(0,20):
     #   sleep(1)
     #   logger.info(">>> My Python application {}".format(i))
-
 
     remoteMe.wait()
 
 
 finally:
-
 
     print("PYTHON finished")
 
