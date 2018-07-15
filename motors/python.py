@@ -5,7 +5,11 @@ import socket
 
 
 import struct
-import sys; sys.path.append('./base');
+import sys
+import os
+os.chdir(sys.argv[1])
+
+sys.path.append('../base');
 
 import remotemeMessages
 import remoteme
