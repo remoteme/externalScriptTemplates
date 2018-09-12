@@ -1,3 +1,5 @@
+
+
 import socket
 import threading
 
@@ -7,7 +9,8 @@ import remotemeMessages
 import remotemeStruct
 import logging
 
-from remotemeMessages import getUserMessage
+from variables import Variables
+
 
 
 class Singleton(type):
@@ -27,6 +30,7 @@ class RemoteMe(metaclass=Singleton):
     __socketObj = None
     __ownId = None
     __threadRead = None
+    __variables = None
 
     def __init__(self):
         self.__logger = logging.getLogger('remoteMe.RemoteMe')
@@ -58,6 +62,9 @@ class RemoteMe(metaclass=Singleton):
                                 self.__onSyncMessage(senderDeviceId, messageId, data)
                             else:
                                 print('PYTHON wrong deviceId :{} '.format(receiverDeviceId))
+                        elif messageType == remotemeStruct.MessageType.VARIABLE_CHANGE_PROPAGATE_MESSAGE:
+                            self.getVariables().__onVariableChangePropagate(data)
+
                         else:
                             print('PYTHON wrong data type {} '.format(messageType))
             except:
@@ -66,6 +73,11 @@ class RemoteMe(metaclass=Singleton):
         print("PYTHON end loop")
 
 
+
+    def getVariables(self):
+        if (self.__variables == None):
+            self.__variables =  Variables(self)
+        return self.__variables
 
 
     def __toHexString(self,array):
@@ -89,15 +101,17 @@ class RemoteMe(metaclass=Singleton):
                 response=[]
 
             responseMessage = remotemeMessages.getSyncResponseMessage(messageId,response)
-            self.__send(responseMessage)
+            self.send(responseMessage)
         else:
             self.__logger.warning("got user sync message but no function to process was set")
 
 
-    def __send(self,message):
+
+
+    def send(self,message):
         self.__socketObj.sendall(message)
 
-    def __sendRest(self, message):
+    def sendRest(self, message):
         self.__socketObj.sendall(message)
 
     def __exit__(self, exc_type, exc_value, traceback):
@@ -126,6 +140,8 @@ class RemoteMe(metaclass=Singleton):
             self.__logger.info("got parameters {} : {}".format(len(sysargv), sysargv))
             exit(1)
 
+    def getDeviceId(self):
+        return self.__ownId
 
     def startRemoteMeDirect(self, port, parentId, ownId,name):
         if self.__socketObj is not None:
@@ -143,8 +159,9 @@ class RemoteMe(metaclass=Singleton):
         self.__threadRead.daemon = True
         self.__threadRead.start()
 
-        self.__send(remotemeMessages.getRegisterLeafDeviceMessage(parentId, self.__ownId, name,
+        self.send(remotemeMessages.getRegisterLeafDeviceMessage(parentId, self.__ownId, name,
                                                                   remotemeStruct.LeafDeviceType.LD_EXTERNAL_SCRIPT))
+        self.__logger.info("deivice has been regieteres at parent id:{} name:{} ".format(self.__ownId,name))
 
     def setUserMessageListener(self, function):
         self.__userMessageListener=function
@@ -153,20 +170,22 @@ class RemoteMe(metaclass=Singleton):
         self.__userSyncMessageListener=function
 
     def sendUserMessage(self,receiveDeviceId,data):
-        self.__send(remotemeMessages.getUserMessage(remotemeStruct.UserMessageSettings.NO_RENEWAL, receiveDeviceId, self.__ownId, 0, data))
+        self.send(remotemeMessages.getUserMessage(remotemeStruct.UserMessageSettings.NO_RENEWAL, receiveDeviceId, self.__ownId, 0, data))
 
     def sendUserMessageRest(self, receiveDeviceId, data):
-        self.__sendRest(remotemeMessages.getUserMessage(remotemeStruct.UserMessageSettings.NO_RENEWAL, receiveDeviceId,  self.__ownId, 0, data))
+        self.sendRest(remotemeMessages.getUserMessage(remotemeStruct.UserMessageSettings.NO_RENEWAL, receiveDeviceId,  self.__ownId, 0, data))
 
     def logServerInfo(self, message):
-        self.__send(remotemeMessages.getLogMessage(remotemeStruct.LogLevel.INFO, message))
+        self.send(remotemeMessages.getLogMessage(remotemeStruct.LogLevel.INFO, message))
 
     def logServerWarn(self, message):
-        self.__send(remotemeMessages.getLogMessage(remotemeStruct.LogLevel.WARN, message))
+        self.send(remotemeMessages.getLogMessage(remotemeStruct.LogLevel.WARN, message))
 
     def logServerError(self, message):
-        self.__send(remotemeMessages.getLogMessage(remotemeStruct.LogLevel.ERROR, message))
+        self.send(remotemeMessages.getLogMessage(remotemeStruct.LogLevel.ERROR, message))
 
     def wait(self):
         self.__threadRead.join()
+
+
 
