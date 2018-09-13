@@ -99,21 +99,21 @@ class Variables:
                     toCall(value,value2)
 
 
-    def setBoolean(self,name,value,ignoreCurrent):
+    def setBoolean(self,name,value,ignoreCurrent=False):
         writer = RemoteMeDataWriter()
         writer.writeUInt16(remotemeStruct.VariableType.BOOLEAN._value_)
         writer.writeString(name)
         writer.writeUint8(1 if value else 0)
         self.__remoteMe.send(remotemeMessages.getVariableChangeMessage(self.__remoteMe.getDeviceId(),ignoreCurrent,writer.getBytes()))
 
-    def setInteger(self,name,value,ignoreCurrent):
+    def setInteger(self,name,value,ignoreCurrent=False):
         writer = RemoteMeDataWriter()
         writer.writeUInt16(remotemeStruct.VariableType.INTEGER._value_)
         writer.writeString(name)
         writer.writeInt32(value)
         self.__remoteMe.send(remotemeMessages.getVariableChangeMessage(self.__remoteMe.getDeviceId(), ignoreCurrent, writer.getBytes()))
 
-    def setText(self,name, value, ignoreCurrent):
+    def setText(self,name, value, ignoreCurrent=False):
         writer = RemoteMeDataWriter()
         writer.writeUInt16(remotemeStruct.VariableType.TEXT._value_)
         writer.writeString(name)
@@ -121,7 +121,7 @@ class Variables:
         self.__remoteMe.send(
             remotemeMessages.getVariableChangeMessage(self.__remoteMe.getDeviceId(), ignoreCurrent, writer.getBytes()))
 
-    def setSmallInteger3(self,name, value, value2, value3, ignoreCurrent):
+    def setSmallInteger3(self,name, value, value2, value3, ignoreCurrent=False):
         writer = RemoteMeDataWriter()
         writer.writeUInt16(remotemeStruct.VariableType.SMALL_INTEGER_3._value_)
         writer.writeString(name)
@@ -131,7 +131,7 @@ class Variables:
         self.__remoteMe.send(
             remotemeMessages.getVariableChangeMessage(self.__remoteMe.getDeviceId(), ignoreCurrent, writer.getBytes()))
 
-    def setSmallInteger2(self,name, value, value2, ignoreCurrent):
+    def setSmallInteger2(self,name, value, value2, ignoreCurrent=False):
         writer = RemoteMeDataWriter()
         writer.writeUInt16(remotemeStruct.VariableType.SMALL_INTEGER_2._value_)
         writer.writeString(name)
@@ -140,7 +140,7 @@ class Variables:
         self.__remoteMe.send(
             remotemeMessages.getVariableChangeMessage(self.__remoteMe.getDeviceId(), ignoreCurrent, writer.getBytes()))
 
-    def setIntegerBoolean(self,name, value, value2, ignoreCurrent):
+    def setIntegerBoolean(self,name, value, value2, ignoreCurrent=False):
         writer = RemoteMeDataWriter()
         writer.writeUInt16(remotemeStruct.VariableType.INTEGER_BOOLEAN._value_)
         writer.writeString(name)
@@ -149,7 +149,7 @@ class Variables:
         self.__remoteMe.send(
             remotemeMessages.getVariableChangeMessage(self.__remoteMe.getDeviceId(), ignoreCurrent, writer.getBytes()))
 
-    def setDouble(self,name, value, ignoreCurrent):
+    def setDouble(self,name, value, ignoreCurrent=False):
         writer = RemoteMeDataWriter()
         writer.writeUInt16(remotemeStruct.VariableType.DOUBLE._value_)
         writer.writeString(name)
@@ -157,7 +157,7 @@ class Variables:
         self.__remoteMe.send(
             remotemeMessages.getVariableChangeMessage(self.__remoteMe.getDeviceId(), ignoreCurrent, writer.getBytes()))
 
-    def setText2(self,name, value, value2, ignoreCurrent):
+    def setText2(self,name, value, value2, ignoreCurrent=False):
         writer = RemoteMeDataWriter()
         writer.writeUInt16(remotemeStruct.VariableType.TEXT_2._value_)
         writer.writeString(name)
