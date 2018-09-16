@@ -34,6 +34,7 @@ class VariableType(Enum):
     INTEGER_BOOLEAN=5
     DOUBLE=6
     TEXT_2=7
+    SMALL_INTEGER_2_TEXT_2=8
 
 class LogLevel(Enum):
     INFO = 1
