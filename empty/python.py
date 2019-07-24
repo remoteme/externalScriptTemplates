@@ -42,7 +42,9 @@ try:
     logging.basicConfig(level=logging.DEBUG,
                         format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
                         datefmt='%d.%m %H:%M',
-                        filename="logs.log")
+                        filename="logs.log",
+                        stream=sys.stdout)
+
 
     logger = logging.getLogger('application')
 
